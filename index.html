@@ -1,12 +1,1851 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>심장주기 학습</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>심장주기와 혈액의 이동</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Pretendard,
+    "Noto Sans KR",
+    Arial,
+    sans-serif;
+  background: #f4f7fb;
+  color: #263238;
+}
+
+header {
+  background: white;
+  border-bottom: 1px solid #dde3ea;
+  padding: 18px 28px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+header p {
+  margin: 6px 0 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.top-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 18px;
+}
+
+.card {
+  background: white;
+  border: 1px solid #dfe5ec;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.card-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.card-subtitle {
+  font-size: 13px;
+  color: #7a8491;
+  margin-bottom: 12px;
+}
+
+.heart-area {
+  min-height: 470px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#heartSvg {
+  width: 100%;
+  max-height: 470px;
+}
+
+.chamber {
+  stroke-width: 3;
+  transition: transform 0.35s ease, filter 0.35s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.low {
+  fill: #dbeaf8;
+  stroke: #4d89b8;
+}
+
+.high {
+  fill: #fae0df;
+  stroke: #d76863;
+}
+
+.contract {
+  transform: scale(0.88);
+  filter: brightness(0.95);
+}
+
+.vesselBlue {
+  fill: none;
+  stroke: #4d89b8;
+  stroke-width: 15;
+  stroke-linecap: round;
+}
+
+.vesselRed {
+  fill: none;
+  stroke: #d76863;
+  stroke-width: 15;
+  stroke-linecap: round;
+}
+
+.flow {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 10 12;
+  opacity: 0.08;
+}
+
+.flow.blue {
+  stroke: #2979b8;
+}
+
+.flow.red {
+  stroke: #d14f49;
+}
+
+.flow.active {
+  opacity: 1;
+  animation: bloodFlow 0.75s linear infinite;
+}
+
+@keyframes bloodFlow {
+  to {
+    stroke-dashoffset: -44;
+  }
+}
+
+.valve {
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: 0.25s;
+}
+
+.valve.open {
+  stroke: #43a36f;
+}
+
+.valve.closed {
+  stroke: #d65858;
+}
+
+.svgLabel {
+  font-size: 14px;
+  font-weight: 700;
+  fill: #263238;
+}
+
+.svgSmall {
+  font-size: 11px;
+  fill: #667085;
+}
+
+.legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.dot {
+  width: 11px;
+  height: 11px;
+  display: inline-block;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.blue-dot {
+  background: #4d89b8;
+}
+
+.red-dot {
+  background: #d76863;
+}
+
+.status-title {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.status-description {
+  color: #667085;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.status-box {
+  background: #f7f9fc;
+  border: 1px solid #e2e7ee;
+  border-radius: 11px;
+  padding: 11px;
+}
+
+.status-label {
+  font-size: 12px;
+  color: #7a8491;
+  margin-bottom: 4px;
+}
+
+.status-value {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.info-box {
+  margin-top: 12px;
+  padding: 13px;
+  background: #f7f9fc;
+  border: 1px solid #e2e7ee;
+  border-radius: 11px;
+  line-height: 1.55;
+}
+
+.info-box strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #667085;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+button,
+select {
+  font: inherit;
+}
+
+button {
+  border: 1px solid #ccd4dd;
+  background: white;
+  padding: 9px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  min-height: 42px;
+}
+
+button:hover {
+  background: #f2f5f8;
+}
+
+button.active {
+  background: #263b52;
+  color: white;
+  border-color: #263b52;
+}
+
+.speed {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 13px;
+}
+
+select {
+  padding: 8px;
+  border-radius: 9px;
+  border: 1px solid #ccd4dd;
+  background: white;
+}
+
+.ecg-card {
+  margin-top: 18px;
+}
+
+#ecgSvg {
+  width: 100%;
+  height: auto;
+}
+
+.ecg-line {
+  fill: none;
+  stroke: #27323d;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.playhead {
+  stroke: #f0a000;
+  stroke-width: 3;
+}
+
+.timeline-title {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.timeline-text {
+  font-size: 11px;
+}
+
+.phase-section {
+  margin-top: 18px;
+}
+
+.phase-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.note {
+  margin-top: 15px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fff8e3;
+  border: 1px solid #f1ddb1;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.causal {
+  margin-top: 12px;
+  font-weight: 650;
+  line-height: 1.65;
+}
+
+@media (max-width: 850px) {
+
+  .top-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .heart-area {
+    min-height: 360px;
+  }
+
+  .speed {
+    margin-left: 0;
+  }
+}
+</style>
 </head>
 
+
 <body>
-  <h1>심장주기 학습 앱</h1>
-  <p>심방과 심실의 수축·이완을 학습합니다.</p>
+
+<header>
+  <h1>🫀 심장주기와 혈액의 이동</h1>
+  <p>
+    Cardiac cycle · Blood flow · Valves · ECG
+  </p>
+</header>
+
+
+<div class="container">
+
+<div class="top-grid">
+
+<!-- 심장 -->
+<section class="card">
+
+  <div class="card-title">심장과 혈액의 이동</div>
+
+  <div class="card-subtitle">
+    심장주기가 진행되면서 심방·심실의 상태와 혈류 방향이 변합니다.
+  </div>
+
+  <div class="legend">
+    <span>
+      <span class="dot blue-dot"></span>
+      산소가 적은 혈액
+    </span>
+
+    <span>
+      <span class="dot red-dot"></span>
+      산소가 많은 혈액
+    </span>
+
+    <span>
+      <span style="color:#43a36f;font-weight:700;">━</span>
+      판막 열림
+    </span>
+
+    <span>
+      <span style="color:#d65858;font-weight:700;">━</span>
+      판막 닫힘
+    </span>
+  </div>
+
+
+  <div class="heart-area">
+
+  <svg
+    id="heartSvg"
+    viewBox="0 0 600 500"
+    aria-label="심장 구조 모식도">
+
+    <!-- 혈관 -->
+
+    <!-- 대정맥 -->
+    <path
+      class="vesselBlue"
+      d="M100 25
+         L100 125
+         Q110 145 155 150" />
+
+    <path
+      class="vesselBlue"
+      d="M100 475
+         L100 380
+         Q115 350 160 340" />
+
+    <!-- 폐동맥 -->
+    <path
+      class="vesselBlue"
+      d="M240 330
+         Q180 270 190 175
+         Q200 115 280 85" />
+
+    <!-- 폐정맥 -->
+    <path
+      class="vesselRed"
+      d="M570 125
+         Q500 125 420 155" />
+
+    <path
+      class="vesselRed"
+      d="M570 170
+         Q500 170 420 175" />
+
+    <!-- 대동맥 -->
+    <path
+      class="vesselRed"
+      d="M385 325
+         Q430 230 405 100
+         Q395 40 470 35" />
+
+
+    <!-- 심장방 -->
+
+    <rect
+      id="rightAtrium"
+      class="chamber low"
+      x="135"
+      y="135"
+      width="135"
+      height="110"
+      rx="48" />
+
+    <rect
+      id="rightVentricle"
+      class="chamber low"
+      x="155"
+      y="285"
+      width="145"
+      height="145"
+      rx="58" />
+
+    <rect
+      id="leftAtrium"
+      class="chamber high"
+      x="340"
+      y="135"
+      width="130"
+      height="110"
+      rx="48" />
+
+    <rect
+      id="leftVentricle"
+      class="chamber high"
+      x="325"
+      y="280"
+      width="165"
+      height="165"
+      rx="65" />
+
+
+    <!-- 판막 -->
+
+    <line
+      id="tricuspidValve"
+      class="valve open"
+      x1="165"
+      y1="265"
+      x2="245"
+      y2="265" />
+
+    <line
+      id="mitralValve"
+      class="valve open"
+      x1="360"
+      y1="265"
+      x2="440"
+      y2="265" />
+
+    <line
+      id="pulmonaryValve"
+      class="valve closed"
+      x1="225"
+      y1="290"
+      x2="255"
+      y2="265" />
+
+    <line
+      id="aorticValve"
+      class="valve closed"
+      x1="370"
+      y1="290"
+      x2="405"
+      y2="260" />
+
+
+    <!-- 혈류 -->
+
+    <path
+      id="flowVein"
+      class="flow blue"
+      d="M100 45
+         L100 120
+         Q115 150 170 165" />
+
+    <path
+      id="flowRAtoRV"
+      class="flow blue"
+      d="M200 215
+         L205 315" />
+
+    <path
+      id="flowRVtoPA"
+      class="flow blue"
+      d="M225 350
+         Q180 275 200 170
+         Q215 120 275 90" />
+
+    <path
+      id="flowPulmVein"
+      class="flow red"
+      d="M555 145
+         Q490 145 410 175" />
+
+    <path
+      id="flowLAtoLV"
+      class="flow red"
+      d="M405 215
+         L405 320" />
+
+    <path
+      id="flowLVtoAO"
+      class="flow red"
+      d="M405 350
+         Q455 240 415 105
+         Q405 50 465 40" />
+
+
+    <!-- 라벨 -->
+
+    <text
+      x="202"
+      y="180"
+      text-anchor="middle"
+      class="svgLabel">
+      우심방
+    </text>
+
+    <text
+      x="202"
+      y="201"
+      text-anchor="middle"
+      class="svgSmall">
+      Right atrium
+    </text>
+
+
+    <text
+      x="225"
+      y="348"
+      text-anchor="middle"
+      class="svgLabel">
+      우심실
+    </text>
+
+    <text
+      x="225"
+      y="369"
+      text-anchor="middle"
+      class="svgSmall">
+      Right ventricle
+    </text>
+
+
+    <text
+      x="405"
+      y="180"
+      text-anchor="middle"
+      class="svgLabel">
+      좌심방
+    </text>
+
+    <text
+      x="405"
+      y="201"
+      text-anchor="middle"
+      class="svgSmall">
+      Left atrium
+    </text>
+
+
+    <text
+      x="408"
+      y="352"
+      text-anchor="middle"
+      class="svgLabel">
+      좌심실
+    </text>
+
+    <text
+      x="408"
+      y="373"
+      text-anchor="middle"
+      class="svgSmall">
+      Left ventricle
+    </text>
+
+
+    <text
+      x="63"
+      y="65"
+      class="svgSmall">
+      대정맥
+    </text>
+
+    <text
+      x="502"
+      y="110"
+      class="svgSmall">
+      폐정맥
+    </text>
+
+    <text
+      x="218"
+      y="70"
+      class="svgSmall">
+      폐동맥
+    </text>
+
+    <text
+      x="455"
+      y="25"
+      class="svgSmall">
+      대동맥
+    </text>
+
+  </svg>
+
+  </div>
+</section>
+
+
+
+<!-- 상태창 -->
+<section class="card">
+
+  <div class="card-title">현재 심장 상태</div>
+
+  <div
+    id="phaseTitle"
+    class="status-title">
+    심실확장기
+  </div>
+
+  <div
+    id="phaseDescription"
+    class="status-description">
+  </div>
+
+
+  <div class="status-grid">
+
+    <div class="status-box">
+      <div class="status-label">심방</div>
+      <div
+        id="atriaStatus"
+        class="status-value">
+      </div>
+    </div>
+
+
+    <div class="status-box">
+      <div class="status-label">심실</div>
+      <div
+        id="ventricleStatus"
+        class="status-value">
+      </div>
+    </div>
+
+
+    <div class="status-box">
+      <div class="status-label">
+        방실판막
+        (AV valves)
+      </div>
+
+      <div
+        id="avValveStatus"
+        class="status-value">
+      </div>
+    </div>
+
+
+    <div class="status-box">
+      <div class="status-label">
+        반월판막
+        (Semilunar valves)
+      </div>
+
+      <div
+        id="semilunarStatus"
+        class="status-value">
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="info-box">
+
+    <strong>혈액 이동</strong>
+
+    <div id="bloodFlowText"></div>
+
+  </div>
+
+
+  <div class="info-box">
+
+    <strong>ECG와의 관계</strong>
+
+    <div id="ecgRelationship"></div>
+
+  </div>
+
+
+  <div
+    id="causalText"
+    class="causal">
+  </div>
+
+
+  <div class="note">
+
+    ECG는 심장의
+    <strong>전기적 활동</strong>을 기록합니다.
+
+    P파 자체가 심방 수축,
+    QRS complex 자체가 심실 수축을 의미하는 것은 아닙니다.
+
+    전기적 탈분극이 먼저 일어난 뒤
+    심근의 기계적 수축이 이어집니다.
+
+  </div>
+
+</section>
+
+</div>
+
+
+
+<!-- 조작 -->
+<section class="card phase-section">
+
+<div class="card-title">
+심장주기 조작
+</div>
+
+<div class="controls">
+
+<button id="playButton">
+▶ 자동재생
+</button>
+
+<button id="pauseButton">
+⏸ 일시정지
+</button>
+
+<button id="resetButton">
+↺ 처음부터
+</button>
+
+
+<div class="speed">
+
+<label for="speedSelect">
+재생 속도
+</label>
+
+<select id="speedSelect">
+
+<option value="0.5">
+0.5×
+</option>
+
+<option
+value="1"
+selected>
+1×
+</option>
+
+<option value="2">
+2×
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<div
+class="phase-buttons"
+style="margin-top:12px">
+
+<button
+class="phaseButton"
+data-phase="atrialSystole">
+
+심방수축기
+</button>
+
+
+<button
+class="phaseButton"
+data-phase="atrialDiastole">
+
+심방확장기
+</button>
+
+
+<button
+class="phaseButton"
+data-phase="ventricularSystole">
+
+심실수축기
+</button>
+
+
+<button
+class="phaseButton active"
+data-phase="ventricularDiastole">
+
+심실확장기
+</button>
+
+</div>
+
+</section>
+
+
+
+<!-- ECG -->
+<section class="card ecg-card">
+
+<div class="card-title">
+심전도 (ECG)
+</div>
+
+<div class="card-subtitle">
+전기적 활동과 심근의 기계적 활동 사이의 시간적 관계를 확인하세요.
+</div>
+
+
+<svg
+id="ecgSvg"
+viewBox="0 0 1000 270">
+
+
+<!-- 기준선 -->
+
+<line
+x1="60"
+y1="115"
+x2="950"
+y2="115"
+stroke="#d9dee5"
+stroke-width="1" />
+
+
+<!-- ECG -->
+
+<path
+class="ecg-line"
+d="
+M60 115
+
+L155 115
+
+C168 115
+173 91
+188 91
+
+C203 91
+210 115
+225 115
+
+L325 115
+
+L345 108
+
+L357 130
+
+L372 40
+
+L391 158
+
+L408 94
+
+L425 115
+
+L570 115
+
+C600 115
+610 75
+650 75
+
+C690 75
+705 115
+740 115
+
+L950 115
+"
+/>
+
+
+<!-- ECG 라벨 -->
+
+<text
+x="188"
+y="72"
+text-anchor="middle"
+font-size="13"
+font-weight="700">
+
+P wave
+
+</text>
+
+
+<text
+x="375"
+y="25"
+text-anchor="middle"
+font-size="13"
+font-weight="700">
+
+QRS complex
+
+</text>
+
+
+<text
+x="650"
+y="57"
+text-anchor="middle"
+font-size="13"
+font-weight="700">
+
+T wave
+
+</text>
+
+
+
+<!-- playhead -->
+
+<line
+id="playhead"
+class="playhead"
+x1="60"
+y1="20"
+x2="60"
+y2="250" />
+
+
+
+<!-- 심방 시간축 -->
+
+<text
+x="60"
+y="190"
+class="timeline-title">
+
+심방
+
+</text>
+
+
+<rect
+x="110"
+y="175"
+width="120"
+height="22"
+rx="8"
+fill="#dbc9e9" />
+
+
+<rect
+x="230"
+y="175"
+width="680"
+height="22"
+rx="8"
+fill="#f1f3f6"
+stroke="#d9dee5" />
+
+
+<text
+x="170"
+y="190"
+text-anchor="middle"
+class="timeline-text">
+
+수축
+
+</text>
+
+
+<text
+x="570"
+y="190"
+text-anchor="middle"
+class="timeline-text">
+
+이완
+
+</text>
+
+
+
+<!-- 심실 시간축 -->
+
+<text
+x="60"
+y="230"
+class="timeline-title">
+
+심실
+
+</text>
+
+
+<rect
+x="110"
+y="215"
+width="275"
+height="22"
+rx="8"
+fill="#f1f3f6"
+stroke="#d9dee5" />
+
+
+<rect
+x="385"
+y="215"
+width="310"
+height="22"
+rx="8"
+fill="#cadcec" />
+
+
+<rect
+x="695"
+y="215"
+width="215"
+height="22"
+rx="8"
+fill="#f1f3f6"
+stroke="#d9dee5" />
+
+
+<text
+x="245"
+y="230"
+text-anchor="middle"
+class="timeline-text">
+
+이완
+
+</text>
+
+
+<text
+x="540"
+y="230"
+text-anchor="middle"
+class="timeline-text">
+
+수축
+
+</text>
+
+
+<text
+x="800"
+y="230"
+text-anchor="middle"
+class="timeline-text">
+
+이완
+
+</text>
+
+
+</svg>
+
+</section>
+
+
+</div>
+
+
+<script>
+
+/*
+=================================================
+심장주기 상태 데이터
+=================================================
+*/
+
+const phases = {
+
+ventricularDiastole: {
+
+title:
+"심실확장기 (Ventricular diastole)",
+
+description:
+"심실이 이완하면서 심실 내부 압력이 낮아집니다. 반월판막이 닫히고 방실판막이 열리면서 심방의 혈액이 심실로 이동합니다.",
+
+atria:
+"이완",
+
+ventricles:
+"이완",
+
+avValve:
+"열림",
+
+semilunar:
+"닫힘",
+
+bloodFlow:
+"대정맥 → 우심방 → 우심실 / 폐정맥 → 좌심방 → 좌심실",
+
+ecg:
+"T파 이후 심실 재분극이 완료되고 심실 이완과 충만이 진행됩니다.",
+
+causal:
+"심실 재분극 → 심실 이완 → 심실 압력 감소 → 반월판막 닫힘 → 방실판막 열림 → 심실 충만",
+
+position:
+0.82,
+
+atriaContract:
+false,
+
+ventricleContract:
+false,
+
+avOpen:
+true,
+
+semilunarOpen:
+false,
+
+flows: [
+"flowVein",
+"flowRAtoRV",
+"flowPulmVein",
+"flowLAtoLV"
+]
+
+},
+
+
+
+atrialSystole: {
+
+title:
+"심방수축기 (Atrial systole)",
+
+description:
+"심방이 수축하여 심방에 남아 있던 혈액을 심실로 밀어 넣습니다. 심실은 아직 이완 상태입니다.",
+
+atria:
+"수축",
+
+ventricles:
+"이완",
+
+avValve:
+"열림",
+
+semilunar:
+"닫힘",
+
+bloodFlow:
+"우심방 → 우심실 / 좌심방 → 좌심실",
+
+ecg:
+"P파에서 심방 탈분극이 일어나며, 그 직후 심방의 기계적 수축이 발생합니다.",
+
+causal:
+"심방 탈분극 → 심방 수축 → 심방 압력 증가 → 심실로 혈액 이동",
+
+position:
+0.18,
+
+atriaContract:
+true,
+
+ventricleContract:
+false,
+
+avOpen:
+true,
+
+semilunarOpen:
+false,
+
+flows: [
+"flowRAtoRV",
+"flowLAtoLV"
+]
+
+},
+
+
+
+ventricularSystole: {
+
+title:
+"심실수축기 (Ventricular systole)",
+
+description:
+"심실이 수축하면서 심실 내부 압력이 증가합니다. 방실판막은 닫히고, 압력이 충분히 높아지면 반월판막이 열려 혈액이 폐동맥과 대동맥으로 박출됩니다.",
+
+atria:
+"이완",
+
+ventricles:
+"수축",
+
+avValve:
+"닫힘",
+
+semilunar:
+"열림",
+
+bloodFlow:
+"우심실 → 폐동맥 / 좌심실 → 대동맥",
+
+ecg:
+"QRS complex에서 심실 탈분극이 일어난 후 심실의 기계적 수축이 시작됩니다.",
+
+causal:
+"심실 탈분극 → 심실 수축 → 심실 압력 증가 → 방실판막 닫힘 → 반월판막 열림 → 혈액 박출",
+
+position:
+0.48,
+
+atriaContract:
+false,
+
+ventricleContract:
+true,
+
+avOpen:
+false,
+
+semilunarOpen:
+true,
+
+flows: [
+"flowRVtoPA",
+"flowLVtoAO",
+"flowVein",
+"flowPulmVein"
+]
+
+},
+
+
+
+atrialDiastole: {
+
+title:
+"심방확장기 (Atrial diastole)",
+
+description:
+"심방은 심실수축기의 대부분과 심실확장기 동안 이완되어 있으며 대정맥과 폐정맥에서 들어오는 혈액을 받아들입니다.",
+
+atria:
+"이완",
+
+ventricles:
+"수축 또는 이완",
+
+avValve:
+"심실 상태에 따라 변화",
+
+semilunar:
+"심실 상태에 따라 변화",
+
+bloodFlow:
+"대정맥 → 우심방 / 폐정맥 → 좌심방",
+
+ecg:
+"심방 재분극은 심실의 QRS complex와 시간적으로 겹쳐 일반적인 ECG에서는 뚜렷하게 구별되지 않습니다.",
+
+causal:
+"심방 이완 → 심방 압력 감소 → 정맥에서 심방으로 혈액 유입",
+
+position:
+0.57,
+
+atriaContract:
+false,
+
+ventricleContract:
+false,
+
+avOpen:
+false,
+
+semilunarOpen:
+true,
+
+flows: [
+"flowVein",
+"flowPulmVein"
+]
+
+}
+
+};
+
+
+
+/*
+=================================================
+HTML 요소
+=================================================
+*/
+
+const phaseTitle =
+document.getElementById("phaseTitle");
+
+const phaseDescription =
+document.getElementById("phaseDescription");
+
+const atriaStatus =
+document.getElementById("atriaStatus");
+
+const ventricleStatus =
+document.getElementById("ventricleStatus");
+
+const avValveStatus =
+document.getElementById("avValveStatus");
+
+const semilunarStatus =
+document.getElementById("semilunarStatus");
+
+const bloodFlowText =
+document.getElementById("bloodFlowText");
+
+const ecgRelationship =
+document.getElementById("ecgRelationship");
+
+const causalText =
+document.getElementById("causalText");
+
+const playhead =
+document.getElementById("playhead");
+
+
+const rightAtrium =
+document.getElementById("rightAtrium");
+
+const leftAtrium =
+document.getElementById("leftAtrium");
+
+const rightVentricle =
+document.getElementById("rightVentricle");
+
+const leftVentricle =
+document.getElementById("leftVentricle");
+
+
+const tricuspidValve =
+document.getElementById("tricuspidValve");
+
+const mitralValve =
+document.getElementById("mitralValve");
+
+const pulmonaryValve =
+document.getElementById("pulmonaryValve");
+
+const aorticValve =
+document.getElementById("aorticValve");
+
+
+
+/*
+=================================================
+재생 순서
+=================================================
+*/
+
+const automaticCycle = [
+
+"ventricularDiastole",
+
+"atrialSystole",
+
+"ventricularSystole",
+
+"ventricularDiastole"
+
+];
+
+
+let cycleIndex = 0;
+
+let timer = null;
+
+let speed = 1;
+
+
+
+/*
+=================================================
+혈류 표시
+=================================================
+*/
+
+const flowIds = [
+
+"flowVein",
+
+"flowRAtoRV",
+
+"flowRVtoPA",
+
+"flowPulmVein",
+
+"flowLAtoLV",
+
+"flowLVtoAO"
+
+];
+
+
+function setFlows(activeFlows) {
+
+flowIds.forEach(id => {
+
+const element =
+document.getElementById(id);
+
+element.classList.remove("active");
+
+});
+
+
+activeFlows.forEach(id => {
+
+const element =
+document.getElementById(id);
+
+if(element) {
+
+element.classList.add("active");
+
+}
+
+});
+
+}
+
+
+
+/*
+=================================================
+판막 표시
+=================================================
+*/
+
+function setValve(
+element,
+isOpen
+) {
+
+element.classList.remove(
+"open",
+"closed"
+);
+
+element.classList.add(
+isOpen
+? "open"
+: "closed"
+);
+
+}
+
+
+
+/*
+=================================================
+심장주기 단계 변경
+=================================================
+*/
+
+function showPhase(phaseName) {
+
+const phase =
+phases[phaseName];
+
+
+phaseTitle.textContent =
+phase.title;
+
+phaseDescription.textContent =
+phase.description;
+
+atriaStatus.textContent =
+phase.atria;
+
+ventricleStatus.textContent =
+phase.ventricles;
+
+avValveStatus.textContent =
+phase.avValve;
+
+semilunarStatus.textContent =
+phase.semilunar;
+
+bloodFlowText.textContent =
+phase.bloodFlow;
+
+ecgRelationship.textContent =
+phase.ecg;
+
+causalText.textContent =
+phase.causal;
+
+
+/*
+심방 수축
+*/
+
+rightAtrium
+.classList
+.toggle(
+"contract",
+phase.atriaContract
+);
+
+leftAtrium
+.classList
+.toggle(
+"contract",
+phase.atriaContract
+);
+
+
+/*
+심실 수축
+*/
+
+rightVentricle
+.classList
+.toggle(
+"contract",
+phase.ventricleContract
+);
+
+leftVentricle
+.classList
+.toggle(
+"contract",
+phase.ventricleContract
+);
+
+
+/*
+판막
+*/
+
+setValve(
+tricuspidValve,
+phase.avOpen
+);
+
+setValve(
+mitralValve,
+phase.avOpen
+);
+
+setValve(
+pulmonaryValve,
+phase.semilunarOpen
+);
+
+setValve(
+aorticValve,
+phase.semilunarOpen
+);
+
+
+/*
+혈류
+*/
+
+setFlows(
+phase.flows
+);
+
+
+/*
+ECG playhead
+*/
+
+const startX = 60;
+
+const endX = 950;
+
+const x =
+startX +
+(endX - startX)
+* phase.position;
+
+
+playhead.setAttribute(
+"x1",
+x
+);
+
+playhead.setAttribute(
+"x2",
+x
+);
+
+
+/*
+버튼 강조
+*/
+
+document
+.querySelectorAll(".phaseButton")
+.forEach(button => {
+
+button.classList.toggle(
+"active",
+button.dataset.phase === phaseName
+);
+
+});
+
+}
+
+
+
+/*
+=================================================
+자동재생
+=================================================
+*/
+
+function stopPlayback() {
+
+if(timer) {
+
+clearInterval(timer);
+
+timer = null;
+
+}
+
+}
+
+
+
+function startPlayback() {
+
+stopPlayback();
+
+
+timer =
+setInterval(() => {
+
+cycleIndex++;
+
+if(
+cycleIndex
+>=
+automaticCycle.length
+) {
+
+cycleIndex = 0;
+
+}
+
+showPhase(
+automaticCycle[
+cycleIndex
+]
+);
+
+},
+1700 / speed);
+
+}
+
+
+
+/*
+=================================================
+버튼 이벤트
+=================================================
+*/
+
+document
+.getElementById("playButton")
+.addEventListener(
+"click",
+startPlayback
+);
+
+
+document
+.getElementById("pauseButton")
+.addEventListener(
+"click",
+stopPlayback
+);
+
+
+document
+.getElementById("resetButton")
+.addEventListener(
+"click",
+() => {
+
+stopPlayback();
+
+cycleIndex = 0;
+
+showPhase(
+"ventricularDiastole"
+);
+
+}
+);
+
+
+
+document
+.getElementById("speedSelect")
+.addEventListener(
+"change",
+event => {
+
+speed =
+Number(
+event.target.value
+);
+
+if(timer) {
+
+startPlayback();
+
+}
+
+}
+);
+
+
+
+document
+.querySelectorAll(".phaseButton")
+.forEach(button => {
+
+button.addEventListener(
+"click",
+() => {
+
+stopPlayback();
+
+showPhase(
+button.dataset.phase
+);
+
+}
+);
+
+});
+
+
+
+/*
+=================================================
+초기 화면
+=================================================
+*/
+
+showPhase(
+"ventricularDiastole"
+);
+
+</script>
+
+
 </body>
 </html>
